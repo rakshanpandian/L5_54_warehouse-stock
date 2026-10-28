@@ -5,10 +5,12 @@ import hashlib
 import os
 from datetime import datetime
 from simpleeval import simple_eval
+from dotenv import load_dotenv
+load_dotenv()
 # Global variables
 warehouse_stock = {}
 AUDIT_FILE = "warehouse_audit.log"
-SUPERVISOR_PASSWORD = "wh-admin-1234"
+SUPERVISOR_PASSWORD = os.getenv("SUPERVISOR_PASSWORD")
 
 def addStock(sku="default", qty=0, history=[]):
     if not sku:
