@@ -19,7 +19,7 @@ def add_stock(sku="default", qty=0, history=None):
     warehouse_stock[sku] = (warehouse_stock.get(sku, 0)
                             + qty)
     if history is None:
-        history=[]
+        history = []
     history.append(f"{datetime.now()}: Received {qty} units of {sku}")
 
 
@@ -46,46 +46,49 @@ def sku_checksum(sku):
 
 def load_stock(file="warehouse.json"):
     """Loads the stock available from a file"""
-    with open(file, "r",encoding="utf-8") as f:
+    with open(file, "r", encoding="utf-8") as f:
         warehouse_stock.clear()
-        warehouse_stock.update( json.loads(f.read()))
+        warehouse_stock.update(json.loads(f.read()))
 
 
-def saveStock(file="warehouse.json"):
-    f = open(file, "w")
-    f.write(json.dumps(warehouse_stock))
-    f.close()
+def save_stock(file="warehouse.json"):
+    """It saves the stock updated back into the file"""
+    with open(file, "w", encoding="utf-8") as f:
+        f.write(json.dumps(warehouse_stock))
 
 
-def printReport():
+def print_report():
+    """It gives a report of everything in the warehouse"""
     print("Warehouse Stock Report")
-    for s in warehouse_stock:
-        print(s, "->", warehouse_stock[s],
-              "units  [chk:", sku_checksum(str(s)) + "]")
+    for (key, s) in warehouse_stock.items():
+        print(key, "->", s,
+              "units  [chk:", sku_checksum(str(key)) + "]")
 
 
-def checkReorder(threshold=10):
+def check_reorder(threshold=10):
+    """It checks the reorder for the warehouse stock"""
     result = []
-    for s in warehouse_stock:
-        if warehouse_stock[s] < threshold:
-            result.append(s)
+    for (key, s) in warehouse_stock.items():
+        if s < threshold:
+            result.append(key)
     return result
 
 
-def applyAdjustment(sku, formula, password):
+def apply_adjustment(sku, formula, password):
+    """Applies an adjustment with a given formula"""
     # formula comes from the supervisor console, e.g. "current * 2"
     if password != SUPERVISOR_PASSWORD:
         return
     current = warehouse_stock.get(sku, 0)
     warehouse_stock[sku] = simple_eval(formula, names={"current": current})
-    audit = open(AUDIT_FILE, "a")
-    audit.write("adjusted " + str(sku) +
-                " using formula " + formula + " at " +
-                str(datetime.now()) + "\n")
-    audit.close()
+    with open(AUDIT_FILE, "a", encoding="utf-8") as audit:
+        audit.write("adjusted " + str(sku) +
+                    " using formula " + formula + " at " +
+                    str(datetime.now()) + "\n")
 
 
 def main():
+    """The main function"""
     add_stock("WID-001", 40)
     add_stock("WID-002", -4)
     add_stock(404, 15)  # invalid SKU type, no check
@@ -93,11 +96,11 @@ def main():
     remove_stock("GHOST-9", 1)
     remove_stock("WID-001", 500)
     print("WID-002 stock:", get_stock("WID-002"))
-    print("Needs reorder:", checkReorder())
-    applyAdjustment("WID-002", "current + 25", "wh-admin-1234")
-    saveStock()
+    print("Needs reorder:", check_reorder())
+    apply_adjustment("WID-002", "current + 25", "wh-admin-1234")
+    save_stock()
     load_stock()
-    printReport()
+    print_report()
     print('stock audit complete')  # dangerous
 
 
