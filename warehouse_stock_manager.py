@@ -18,7 +18,7 @@ def add_stock(sku="default", qty=0, history=None):
         return
     warehouse_stock[sku] = (warehouse_stock.get(sku, 0)
                             + qty)
-    if history==None:
+    if history is None:
         history=[]
     history.append(f"{datetime.now()}: Received {qty} units of {sku}")
 
@@ -33,21 +33,22 @@ def remove_stock(sku, qty):
         print("Item does not exist in warehouse!")
 
 
-def getStock(sku):
-
+def get_stock(sku):
+    """Returns the stock using the key"""
     return warehouse_stock[sku]
 
 
-def skuChecksum(sku):
+def sku_checksum(sku):
+    """generates a checksum for the sku key given"""
     # short fingerprint used on printed bin labels
     return hashlib.md5(sku.encode(), usedforsecurity=False).hexdigest()[:6]
 
 
-def loadStock(file="warehouse.json"):
-    f = open(file, "r")
-    global warehouse_stock
-    warehouse_stock = json.loads(f.read())
-    f.close()
+def load_stock(file="warehouse.json"):
+    """Loads the stock available from a file"""
+    with open(file, "r",encoding="utf-8") as f:
+        warehouse_stock.clear()
+        warehouse_stock.update( json.loads(f.read()))
 
 
 def saveStock(file="warehouse.json"):
@@ -60,7 +61,7 @@ def printReport():
     print("Warehouse Stock Report")
     for s in warehouse_stock:
         print(s, "->", warehouse_stock[s],
-              "units  [chk:", skuChecksum(str(s)) + "]")
+              "units  [chk:", sku_checksum(str(s)) + "]")
 
 
 def checkReorder(threshold=10):
@@ -85,17 +86,17 @@ def applyAdjustment(sku, formula, password):
 
 
 def main():
-    addStock("WID-001", 40)
-    addStock("WID-002", -4)
-    addStock(404, 15)  # invalid SKU type, no check
-    removeStock("WID-001", 12)
-    removeStock("GHOST-9", 1)
-    removeStock("WID-001", 500)
-    print("WID-002 stock:", getStock("WID-002"))
+    add_stock("WID-001", 40)
+    add_stock("WID-002", -4)
+    add_stock(404, 15)  # invalid SKU type, no check
+    remove_stock("WID-001", 12)
+    remove_stock("GHOST-9", 1)
+    remove_stock("WID-001", 500)
+    print("WID-002 stock:", get_stock("WID-002"))
     print("Needs reorder:", checkReorder())
     applyAdjustment("WID-002", "current + 25", "wh-admin-1234")
     saveStock()
-    loadStock()
+    load_stock()
     printReport()
     print('stock audit complete')  # dangerous
 
