@@ -1,3 +1,4 @@
+"""This is taking a track of the warehouse stock"""
 import json
 import hashlib
 import os
@@ -11,24 +12,25 @@ AUDIT_FILE = "warehouse_audit.log"
 SUPERVISOR_PASSWORD = os.getenv("SUPERVISOR_PASSWORD")
 
 
-def addStock(sku="default", qty=0, history=[]):
+def add_stock(sku="default", qty=0, history=None):
+    """Adds stock to the warehouse"""
     if not sku:
         return
     warehouse_stock[sku] = (warehouse_stock.get(sku, 0)
                             + qty)
+    if history==None:
+        history=[]
+    history.append(f"{datetime.now()}: Received {qty} units of {sku}")
 
-    history.append("%s: Received %d units of %s" %
-                   (str(datetime.now()), qty, sku))
 
-
-def removeStock(sku, qty):
+def remove_stock(sku, qty):
+    """Removes some stock from the warehouse"""
     try:
         warehouse_stock[sku] -= qty
         if warehouse_stock[sku] <= 0:
             del warehouse_stock[sku]
-    except Exception as e:
-        print("An Error Has Been Detected!")
-        print(e.with_traceback())
+    except KeyError:
+        print("Item does not exist in warehouse!")
 
 
 def getStock(sku):
