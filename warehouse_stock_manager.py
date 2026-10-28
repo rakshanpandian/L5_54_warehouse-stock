@@ -1,9 +1,10 @@
+import ast
 import json
 import logging
 import hashlib
 import os
 from datetime import datetime
-
+from simpleeval import simple_eval
 # Global variables
 warehouse_stock = {}
 AUDIT_FILE = "warehouse_audit.log"
@@ -61,7 +62,7 @@ def applyAdjustment(sku, formula, password):
     if password != SUPERVISOR_PASSWORD:
         return
     current = warehouse_stock.get(sku, 0)
-    warehouse_stock[sku] = eval(formula, {"current": current})
+    warehouse_stock[sku] = simple_eval(formula, names={"current": current})
     audit = open(AUDIT_FILE, "a")
     audit.write("adjusted " + str(sku) + " using formula " + formula + " at " + str(datetime.now()) + "\n")
     audit.close()
@@ -79,6 +80,6 @@ def main():
     saveStock()
     loadStock()
     printReport()
-    eval("print('stock audit complete')")  # dangerous
+    print('stock audit complete')  # dangerous
 
 main()
