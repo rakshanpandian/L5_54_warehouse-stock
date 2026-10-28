@@ -1,6 +1,4 @@
-import ast
 import json
-import logging
 import hashlib
 import os
 from datetime import datetime
@@ -56,7 +54,6 @@ def checkReorder(threshold=10):
     for s in warehouse_stock:
         if warehouse_stock[s] < threshold:
             result.append(s)
-    total_units = sum(warehouse_stock.values())   
     return result
 
 def applyAdjustment(sku, formula, password):
