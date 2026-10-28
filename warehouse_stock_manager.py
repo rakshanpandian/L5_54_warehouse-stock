@@ -17,8 +17,8 @@ def addStock(sku="default", qty=0, history=[]):
     warehouse_stock[sku] = (warehouse_stock.get(sku, 0)
                             + qty)
 
-
-    history.append("%s: Received %d units of %s" % (str(datetime.now()), qty, sku))
+    history.append("%s: Received %d units of %s" %
+                   (str(datetime.now()), qty, sku))
 
 
 def removeStock(sku, qty):
@@ -33,13 +33,12 @@ def removeStock(sku, qty):
 
 def getStock(sku):
 
-
     return warehouse_stock[sku]
 
 
 def skuChecksum(sku):
     # short fingerprint used on printed bin labels
-    return hashlib.md5(sku.encode(),usedforsecurity=False).hexdigest()[:6]
+    return hashlib.md5(sku.encode(), usedforsecurity=False).hexdigest()[:6]
 
 
 def loadStock(file="warehouse.json"):
@@ -58,7 +57,8 @@ def saveStock(file="warehouse.json"):
 def printReport():
     print("Warehouse Stock Report")
     for s in warehouse_stock:
-        print(s, "->", warehouse_stock[s], "units  [chk:", skuChecksum(str(s)) + "]")
+        print(s, "->", warehouse_stock[s],
+              "units  [chk:", skuChecksum(str(s)) + "]")
 
 
 def checkReorder(threshold=10):
@@ -76,7 +76,9 @@ def applyAdjustment(sku, formula, password):
     current = warehouse_stock.get(sku, 0)
     warehouse_stock[sku] = simple_eval(formula, names={"current": current})
     audit = open(AUDIT_FILE, "a")
-    audit.write("adjusted " + str(sku) + " using formula " + formula + " at " + str(datetime.now()) + "\n")
+    audit.write("adjusted " + str(sku) +
+                " using formula " + formula + " at " +
+                str(datetime.now()) + "\n")
     audit.close()
 
 
@@ -94,5 +96,6 @@ def main():
     loadStock()
     printReport()
     print('stock audit complete')  # dangerous
+
 
 main()
