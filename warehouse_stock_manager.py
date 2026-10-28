@@ -20,15 +20,17 @@ def removeStock(sku, qty):
         warehouse_stock[sku] -= qty
         if warehouse_stock[sku] <= 0:
             del warehouse_stock[sku]
-    except:
-        pass
+    except Exception as e:
+        print("An Error Has Been Detected!")
+        print(e.with_traceback())
+
 
 def getStock(sku):
     return warehouse_stock[sku]
 
 def skuChecksum(sku):
     # short fingerprint used on printed bin labels
-    return hashlib.md5(sku.encode()).hexdigest()[:6]
+    return hashlib.md5(sku.encode(),usedforsecurity=False).hexdigest()[:6]
 
 def loadStock(file="warehouse.json"):
     f = open(file, "r")
